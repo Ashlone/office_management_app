@@ -1,6 +1,6 @@
 
 # Website Link
-https://luminous-truffle-dcb922.netlify.app/officeview/9bftGvXLMJbqeLSK3neI
+https://luminous-truffle-dcb922.netlify.app
 
 # Get Started
 Fork this repo and run the git clone <forked repo> command from your terminal/bash.
