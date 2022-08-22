@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import "./NewOffice.css";
 import { useNavigate } from "react-router-dom";
