@@ -21,39 +21,46 @@ const OfficeView = () => {
   const { id } = params;
   const [staff, setStaff] = useState([]);
   const [query, setQuery] = useState("");
-  const fetchSingleDoc = async () => {
-    try {
-      //Getting a single document from firebase
-      const docRef = doc(db, "offices", id);
-      const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists()) {
-        setSingleDoc(docSnap.data());
-      } else {
-        // doc.data() will be undefined in this case
-        console.log("No such document!");
+  useEffect(() => {
+    const fetchSingleDoc = async () => {
+      try {
+        //Getting a single document from firebase
+        const docRef = doc(db, "offices", id);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setSingleDoc(docSnap.data());
+        } else {
+          // doc.data() will be undefined in this case
+          console.log("No such document!");
+        }
+      } catch (err) {
+        console.log(err);
       }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    };
+    fetchSingleDoc();
+  }, []);
 
-  //Fetching staff members
-  const fetchSubCollection = async () => {
-    const list = [];
-    try {
-      //Getting  subcollection from document
-      const querySnapshot = await getDocs(
-        collection(db, "offices", `${id}`, "staff")
-      );
-      querySnapshot.forEach((doc) => {
-        list.push({ id: doc.id, ...doc.data() });
-        setStaff(list);
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  useEffect(() => {
+    //Fetching staff members
+    const fetchSubCollection = async () => {
+      const list = [];
+      try {
+        //Getting  subcollection from document
+        const querySnapshot = await getDocs(
+          collection(db, "offices", `${id}`, "staff")
+        );
+        querySnapshot.forEach((doc) => {
+          list.push({ id: doc.id, ...doc.data() });
+          setStaff(list);
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchSubCollection();
+  }, []);
 
   //Saving staff member to local storage
   const getStaffMember = async (member) => {
@@ -65,14 +72,6 @@ const OfficeView = () => {
     }
     setOpenEditDeleteModal(true);
   };
-
-  useEffect(() => {
-    fetchSingleDoc();
-  }, []);
-
-  useEffect(() => {
-    fetchSubCollection();
-  }, []);
 
   return (
     <div>

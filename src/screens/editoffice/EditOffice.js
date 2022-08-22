@@ -18,24 +18,24 @@ const EditOffice = () => {
   const [data, setData] = useState();
 
   const docRef = doc(db, "offices", `${officeid}`);
-  const fetchSingleDoc = async () => {
-    try {
-      //Getting a single document from firebase
-
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        setData(docSnap.data());
-      } else {
-        // doc.data() will be undefined in this case
-        console.log("No such document!");
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   useEffect(() => {
+    const fetchSingleDoc = async () => {
+      try {
+        //Getting a single document from firebase
+
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setData(docSnap.data());
+        } else {
+          // doc.data() will be undefined in this case
+          console.log("No such document!");
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
     fetchSingleDoc();
   }, []);
   //Getting the value of the color and keeping the value

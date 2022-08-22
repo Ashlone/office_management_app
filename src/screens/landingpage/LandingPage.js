@@ -8,24 +8,23 @@ import { db } from "../../firebase";
 const LandingPage = () => {
   const navigate = useNavigate();
   const [offices, setOffices] = useState([]);
+
   //fetching data from firestore
-
-  const fetchData = async () => {
-    let dataList = [];
-    try {
-      const querySnapshot = await getDocs(collection(db, "offices"));
-      querySnapshot.forEach((doc) => {
-        dataList.push({ id: doc.id, ...doc.data() });
-        setOffices(dataList);
-      });
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   useEffect(() => {
+    const fetchData = async () => {
+      let dataList = [];
+      try {
+        const querySnapshot = await getDocs(collection(db, "offices"));
+        querySnapshot.forEach((doc) => {
+          dataList.push({ id: doc.id, ...doc.data() });
+          setOffices(dataList);
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    };
     fetchData();
-  }, [fetchData]);
+  }, []);
 
   return (
     <div className="wrapper">
