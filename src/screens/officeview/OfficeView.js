@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
 import OfficeViewCard from "../../components/cards/OfficeViewCard";
+
 const OfficeView = () => {
   //set states
   const [showModal, setShowModal] = useState(false);

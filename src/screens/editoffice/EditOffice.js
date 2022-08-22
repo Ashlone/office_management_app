@@ -16,7 +16,6 @@ const EditOffice = () => {
   const [phonenumber, setPhoneNumber] = useState("");
   const [maximumcapacity, setMaximumCapacity] = useState("");
   const [data, setData] = useState();
-  const [colorpicker, setColorPicker] = useState("");
 
   const docRef = doc(db, "offices", `${officeid}`);
   const fetchSingleDoc = async () => {

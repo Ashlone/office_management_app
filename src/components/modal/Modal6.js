@@ -4,25 +4,9 @@ import { BsDot } from "react-icons/bs";
 import "./Modal6.css";
 import ReactDom from "react-dom";
 import { getDownloadURL, listAll, ref } from "firebase/storage";
-import { db, storage } from "../../firebase";
-import {
-  collection,
-  collectionGroup,
-  doc,
-  getDoc,
-  getDocs,
-  onSnapshot,
-  query,
-  setDoc,
-  updateDoc,
-  where,
-} from "firebase/firestore";
-import { useParams } from "react-router-dom";
+import { storage } from "../../firebase";
 
-const Modal6 = ({ openContinueEditModal, onClose, name, lastname }) => {
-  const params = useParams();
-  const { id } = params;
-
+const Modal6 = ({ openContinueEditModal, onClose }) => {
   //Fetching all the avatars from firebase
   const [avatars, setAvatars] = useState([]);
   const fetchAllAvatars = () => {
@@ -52,8 +36,6 @@ const Modal6 = ({ openContinueEditModal, onClose, name, lastname }) => {
         selectedAvatar: avatar,
       };
     });
-
-    console.log(data.selectedAvatar);
   };
 
   useEffect(() => {
@@ -81,6 +63,7 @@ const Modal6 = ({ openContinueEditModal, onClose, name, lastname }) => {
                   <img
                     key={index}
                     src={avatar}
+                    alt="avatar"
                     onClick={() => handleClickAvatar(avatar)}
                     style={{
                       border: `${

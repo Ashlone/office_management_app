@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import "./Modal4.css";
 import ReactDom from "react-dom";
 import { AiOutlineArrowLeft } from "react-icons/ai";
