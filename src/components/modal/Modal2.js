@@ -84,6 +84,7 @@ const Modal2 = ({ openModal, onClose, name, lastname }) => {
               <div className="avatars">
                 {avatars.map((avatar, index) => (
                   <img
+                    alt="avatar"
                     key={index}
                     src={avatar}
                     onClick={() => handleClickAvatar(avatar)}
