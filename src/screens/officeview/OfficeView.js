@@ -40,7 +40,7 @@ const OfficeView = () => {
       }
     };
     fetchSingleDoc();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     //Fetching staff members
@@ -60,7 +60,7 @@ const OfficeView = () => {
       }
     };
     fetchSubCollection();
-  }, []);
+  }, [id]);
 
   //Saving staff member to local storage
   const getStaffMember = async (member) => {
@@ -69,6 +69,7 @@ const OfficeView = () => {
 
       const stringify = JSON.stringify(member);
       const data = localStorage.setItem("staff", stringify);
+      console.log(data);
     }
     setOpenEditDeleteModal(true);
   };
@@ -94,8 +95,8 @@ const OfficeView = () => {
         .filter((user) => user.name.includes(query))
         .map((member) => (
           <div key={member.id} className="staff-members-list">
-            <img src={`${member.selectedAvatar}`} alt="avatars" />
-            <h6>{`${member.name}` + "  " + `${member.lastname}`} </h6>
+            <img src={member.selectedAvatar} alt="avatars" />
+            <h6>{member.name + "  " + member.lastname} </h6>
             <BiDotsVerticalRounded onClick={() => getStaffMember(member)} />
           </div>
         ))}

@@ -17,13 +17,11 @@ const EditOffice = () => {
   const [maximumcapacity, setMaximumCapacity] = useState("");
   const [data, setData] = useState();
 
-  const docRef = doc(db, "offices", `${officeid}`);
-
   useEffect(() => {
     const fetchSingleDoc = async () => {
       try {
         //Getting a single document from firebase
-
+        const docRef = doc(db, "offices", `${officeid}`);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
@@ -37,7 +35,7 @@ const EditOffice = () => {
       }
     };
     fetchSingleDoc();
-  }, []);
+  }, [officeid]);
   //Getting the value of the color and keeping the value
   const colors = [
     "#FFBE0B",
@@ -66,7 +64,8 @@ const EditOffice = () => {
   //Update Document
   const updateOffice = async () => {
     try {
-      const updateDocument = await updateDoc(docRef, {
+      const docRef = doc(db, "offices", `${officeid}`);
+      await updateDoc(docRef, {
         officename,
         physicaladdress,
         emailaddress,
@@ -74,6 +73,7 @@ const EditOffice = () => {
         maximumcapacity,
         colorpicker: data.colorpicker,
       });
+
       navigate("/");
     } catch (err) {
       console.log(err);
