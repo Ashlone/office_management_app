@@ -4,27 +4,28 @@ import { HiOutlineUserGroup, HiOutlineLocationMarker } from "react-icons/hi";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { IoMailOutline } from "react-icons/io5";
 import { MdOutlinePhone, MdOutlineModeEditOutline } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-const Card = ({ office }) => {
+const OfficeViewCard = ({ singleDoc }) => {
+  const params = useParams();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   return (
     <div
-      style={{ borderLeftColor: `${office.colorpicker}` }}
+      style={{ borderLeftColor: `${singleDoc?.colorpicker}` }}
       className="card-wrapper"
     >
       <div className="title">
-        <h3>{office.officename}</h3>
+        <h3>{singleDoc?.officename}</h3>
         <MdOutlineModeEditOutline
-          onClick={() => navigate(`/officeview/${office.id}`)}
+          onClick={() => navigate(`/officeedit/${params.id}`)}
         />
       </div>
 
       <div className="staff-member">
         <HiOutlineUserGroup color="#484954" />
-        <p>{office.maximumcapacity}</p>
+        <p>{singleDoc?.maximumcapacity}</p>
       </div>
       <hr className="line-divider" />
       <div className="moreinfo">
@@ -40,20 +41,20 @@ const Card = ({ office }) => {
         <>
           <div className="staff-member">
             <MdOutlinePhone color="#484954" />
-            <p>{office.phonenumber}</p>
+            <p>{singleDoc?.phonenumber}</p>
           </div>
           <div className="staff-member">
             <IoMailOutline color="#484954" />
-            <p>{office.emailaddress}</p>
+            <p>{singleDoc?.emailaddress}</p>
           </div>
           <div className="staff-member">
             <HiOutlineUserGroup color="#484954" />
-            <p>Office Capacity: {office.maximumcapacity}</p>
+            <p>Office Capacity: {singleDoc?.maximumcapacity}</p>
           </div>
 
           <div className="staff-member">
             <HiOutlineLocationMarker color="#484954" />
-            <p>{office.physicaladdress}</p>
+            <p>{singleDoc?.physicaladdress}</p>
           </div>
         </>
       )}
@@ -61,4 +62,4 @@ const Card = ({ office }) => {
   );
 };
 
-export default Card;
+export default OfficeViewCard;

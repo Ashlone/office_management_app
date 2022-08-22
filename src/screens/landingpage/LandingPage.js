@@ -1,19 +1,46 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Card from "../../components/cards/Card";
 import "./LandingPage.css";
 import { IoIosAddCircle } from "react-icons/io";
-
+import { useNavigate } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase";
 const LandingPage = () => {
+  const navigate = useNavigate();
+  const [offices, setOffices] = useState([]);
+  //fetching data from firestore
+
+  const fetchData = async () => {
+    let dataList = [];
+    try {
+      const querySnapshot = await getDocs(collection(db, "offices"));
+      querySnapshot.forEach((doc) => {
+        dataList.push({ id: doc.id, ...doc.data() });
+        setOffices(dataList);
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   return (
     <div className="wrapper">
       <h2 className="title">All Offices</h2>
       <div className="column">
-        <Card />
-        <Card />
-        <Card />
+        {offices.map((office) => (
+          <Card key={office.id} office={office} />
+        ))}
       </div>
       <div className="floating-button">
-        <IoIosAddCircle size="60px" color="#0D4477" />
+        <IoIosAddCircle
+          onClick={() => navigate("/newoffice")}
+          size="60px"
+          color="#0D4477"
+        />
       </div>
     </div>
   );

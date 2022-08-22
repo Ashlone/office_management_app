@@ -4,7 +4,7 @@
     border: 1px solid #E8F3FC;
     background: #FFFFFF;
     border-radius: 8px;
-    border-left-color: radial-gradient(108.86% 100.3% at 100.06% 100.3%, #0AB169 42.03%, #0AB169 87.21%);
+
     border-left-width: 10px;
     padding: 10px;
     flex: 1;
@@ -21,6 +21,11 @@
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+.line-divider {
+    width: 100%;
+    border: 0.4px solid #0D4477;
 }
 
 .moreinfo {
