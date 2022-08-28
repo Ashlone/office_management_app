@@ -1,27 +1,54 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import { BsDot } from "react-icons/bs";
 import "./Modal.css";
 import ReactDom from "react-dom";
 import Modal6 from "./Modal6";
+import { GET_OFFICE} from "../../queries/officeQueries";
+import { useQuery } from "@apollo/client";
+import { useParams} from "react-router-dom"
 
-const Modal5 = ({ openEditModal, onClose }) => {
+const Modal5 = ({ openEditModal, onClose,redirect ,staffid}) => {
   //set states
   const [name, setName] = useState("");
   const [lastname, setLastName] = useState("");
   const [openContinueEditModal, setContinueOpenEditModal] = useState(false);
+ const[errorMessage,setErrorMessage]=useState('') 
+const [avatar,setAvatar]=useState('')
+const [ID,setID]=useState('') //setting ID FOR STAFF
 
-  //getting staff details from local storage
-  const parseData = JSON.parse(localStorage.getItem("staff"));
+
+ const params=useParams()
+   const { id } = params;
+ 
+  //Getting data
+  const {data}= useQuery(GET_OFFICE, { variables: { id } });
+
+  
+  //Finding staff by id
+const findStaff= data.office.staff.find((item)=>(
+  item.id===staffid
+))
+
+//Changing state to show fetched data
+useEffect(()=>{
+ setName(findStaff.firstName)
+ setLastName(findStaff.lastName)
+ setAvatar(findStaff.avatar)
+ setID(findStaff.id)
+ },[findStaff])
+
+
+
+  //Function to click next
+  const handleNext = () => {
+    if(!name || !lastname) return setErrorMessage('Please enter staff name and lastname')
+    setContinueOpenEditModal(true);
+  };
 
   if (!openEditModal) {
     return null;
   }
-
-  //Function to click next
-  const handleNext = () => {
-    setContinueOpenEditModal(true);
-  };
 
   return ReactDom.createPortal(
     <>
@@ -29,16 +56,21 @@ const Modal5 = ({ openEditModal, onClose }) => {
         <div className="modal-wrapper">
           <div className="heading-wrapper">
             <h3>Edit Staff Member</h3>
-            <AiOutlineCloseCircle color="#0D4477" onClick={onClose} />
+            <AiOutlineCloseCircle size="20px" color="#0D4477" onClick={onClose} />
           </div>
           <div className="form">
+          {
+          errorMessage  && <div className='errorMessage'>{errorMessage}</div>
+        }
             <input
-              placeholder={parseData.name}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
+            {
+          errorMessage  && <div className='errorMessage'>{errorMessage}</div>
+        }
             <input
-              placeholder={parseData.lastname}
+           
               value={lastname}
               onChange={(e) => setLastName(e.target.value)}
             />
@@ -50,8 +82,11 @@ const Modal5 = ({ openEditModal, onClose }) => {
             <Modal6
               name={name}
               lastname={lastname}
+              staffID={ID}
+              staffAvatar={avatar}
+              redirect={redirect}
               openContinueEditModal={openContinueEditModal}
-              onClose={() => setContinueOpenEditModal(false)}
+              onClose={onClose}
             />
           </div>
         </div>

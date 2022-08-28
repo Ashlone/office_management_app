@@ -12,11 +12,11 @@ const Card = ({ office }) => {
 
   return (
     <div
-      style={{ borderLeftColor: `${office.colorpicker}` }}
+      style={{ borderLeftColor: `${office.color}` }}
       className="card-wrapper"
     >
       <div className="title">
-        <h3>{office.officename}</h3>
+        <h3>{office.officeName}</h3>
         <MdOutlineModeEditOutline
           onClick={() => navigate(`/officeview/${office.id}`)}
         />
@@ -24,15 +24,20 @@ const Card = ({ office }) => {
 
       <div className="staff-member">
         <HiOutlineUserGroup color="#484954" />
-        <p>{office.maximumcapacity}</p>
+        <p>{office.staff.length}</p>
       </div>
       <hr className="line-divider" />
-      <div className="moreinfo">
-        <p>More info</p>
+      <div>
         {!open ? (
-          <IoIosArrowDown color="#0D4477" onClick={() => setOpen(true)} />
+          <div className="moreinfo" onClick={() => setOpen(true)}>
+            <p>More info</p>
+            <IoIosArrowDown color="#0D4477" />
+          </div>
         ) : (
-          <IoIosArrowUp color="#0D4477" onClick={() => setOpen(false)} />
+          <div className="moreinfo" onClick={() => setOpen(false)}>
+            <p>More info</p>
+            <IoIosArrowUp color="#0D4477" />
+          </div>
         )}
       </div>
 
@@ -40,20 +45,20 @@ const Card = ({ office }) => {
         <>
           <div className="staff-member">
             <MdOutlinePhone color="#484954" />
-            <p>{office.phonenumber}</p>
+            <p>{office.phone}</p>
           </div>
           <div className="staff-member">
             <IoMailOutline color="#484954" />
-            <p>{office.emailaddress}</p>
+            <p>{office.email}</p>
           </div>
           <div className="staff-member">
             <HiOutlineUserGroup color="#484954" />
-            <p>Office Capacity: {office.maximumcapacity}</p>
+            <p>Office Capacity: {office.maximumCapacity}</p>
           </div>
 
           <div className="staff-member">
             <HiOutlineLocationMarker color="#484954" />
-            <p>{office.physicaladdress}</p>
+            <p>{office.physicalAddress}</p>
           </div>
         </>
       )}

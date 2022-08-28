@@ -6,18 +6,18 @@ import { IoMailOutline } from "react-icons/io5";
 import { MdOutlinePhone, MdOutlineModeEditOutline } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
 
-const OfficeViewCard = ({ singleDoc }) => {
+const OfficeViewCard = ({office}) => {
   const params = useParams();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   return (
     <div
-      style={{ borderLeftColor: `${singleDoc?.colorpicker}` }}
+      style={{ borderLeftColor: `${office.color}` }}
       className="card-wrapper"
     >
       <div className="title">
-        <h3>{singleDoc?.officename}</h3>
+        <h3>{office.officeName}</h3>
         <MdOutlineModeEditOutline
           onClick={() => navigate(`/officeedit/${params.id}`)}
         />
@@ -25,15 +25,20 @@ const OfficeViewCard = ({ singleDoc }) => {
 
       <div className="staff-member">
         <HiOutlineUserGroup color="#484954" />
-        <p>{singleDoc?.maximumcapacity}</p>
+        <p>{office.staff.length}</p>
       </div>
       <hr className="line-divider" />
-      <div className="moreinfo">
-        <p>More info</p>
+      <div>
         {!open ? (
-          <IoIosArrowDown color="#0D4477" onClick={() => setOpen(true)} />
+          <div className="moreinfo" onClick={() => setOpen(true)}>
+            <p>More info</p>
+            <IoIosArrowDown color="#0D4477" />
+          </div>
         ) : (
-          <IoIosArrowUp color="#0D4477" onClick={() => setOpen(false)} />
+          <div className="moreinfo" onClick={() => setOpen(false)}>
+            <p>More info</p>
+            <IoIosArrowUp color="#0D4477" />
+          </div>
         )}
       </div>
 
@@ -41,20 +46,20 @@ const OfficeViewCard = ({ singleDoc }) => {
         <>
           <div className="staff-member">
             <MdOutlinePhone color="#484954" />
-            <p>{singleDoc?.phonenumber}</p>
+            <p>{office.phone}</p>
           </div>
           <div className="staff-member">
             <IoMailOutline color="#484954" />
-            <p>{singleDoc?.emailaddress}</p>
+            <p>{office.email}</p>
           </div>
           <div className="staff-member">
             <HiOutlineUserGroup color="#484954" />
-            <p>Office Capacity: {singleDoc?.maximumcapacity}</p>
+            <p>Office Capacity: {office.maximumCapacity}</p>
           </div>
 
           <div className="staff-member">
             <HiOutlineLocationMarker color="#484954" />
-            <p>{singleDoc?.physicaladdress}</p>
+            <p>{office.physicalAddress}</p>
           </div>
         </>
       )}

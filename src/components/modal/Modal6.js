@@ -5,8 +5,17 @@ import "./Modal6.css";
 import ReactDom from "react-dom";
 import { getDownloadURL, listAll, ref } from "firebase/storage";
 import { storage } from "../../firebase";
+import {  useParams} from "react-router-dom";
+import { UPDATE_STAFF } from '../../mutations/officeMutations';
+import { useMutation } from '@apollo/client';
+import {GET_OFFICES} from'../../queries/officeQueries'
 
-const Modal6 = ({ openContinueEditModal, onClose }) => {
+const Modal6 = ({ openContinueEditModal, onClose, staffID, name,lastname,redirect, staffAvatar}) => {
+   
+   const params=useParams()
+   const { id } = params;
+ 
+  
   //Fetching all the avatars from firebase
   const [avatars, setAvatars] = useState([]);
   const fetchAllAvatars = () => {
@@ -27,20 +36,38 @@ const Modal6 = ({ openContinueEditModal, onClose }) => {
       });
   };
 
-  const [data, setData] = useState(JSON.parse(localStorage.getItem("staff")));
+useEffect(() => {
+    fetchAllAvatars();
+  }, []);
+
+  
   //Selecting Avatar
+  const [selectedAvatar,setSelectedAvatar]=useState('')
+
+  useEffect(()=>{
+setSelectedAvatar(staffAvatar)
+  },[staffAvatar])
+
+
   const handleClickAvatar = (avatar) => {
-    setData((items) => {
-      return {
-        ...items,
-        selectedAvatar: avatar,
-      };
+    setSelectedAvatar(() => {
+      return avatar;
     });
   };
 
-  useEffect(() => {
-    fetchAllAvatars();
-  }, []);
+
+ /**Update staff member  */
+ const [updateStaff,{  loading }] = useMutation(UPDATE_STAFF, {
+    variables: { id:id,staffid:staffID, firstName:name,lastName:lastname,avatar:selectedAvatar},
+    onCompleted: redirect,
+    refetchQueries: [{ query: GET_OFFICES }]
+  });
+
+
+const updateStaffMember=()=>{
+  updateStaff({ id:id,staffid:staffID, firstName:name,lastName:lastname,avatar:selectedAvatar})
+}
+
 
   //should be at the end
   if (!openContinueEditModal) {
@@ -54,7 +81,7 @@ const Modal6 = ({ openContinueEditModal, onClose }) => {
           <div className="inner-wrapper">
             <div className="heading-wrapper">
               <h3>Edit Staff Member</h3>
-              <AiOutlineCloseCircle color="#0D4477" onClick={onClose} />
+              <AiOutlineCloseCircle size="20px" color="#0D4477" onClick={onClose} />
             </div>
             <div className="avatar-wrapper">
               <h3>Avatar</h3>
@@ -66,8 +93,9 @@ const Modal6 = ({ openContinueEditModal, onClose }) => {
                     alt="avatar"
                     onClick={() => handleClickAvatar(avatar)}
                     style={{
+                      borderRadius: "50%",
                       border: `${
-                        avatar === data?.selectedAvatar
+                        avatar === selectedAvatar
                           ? `4px solid #475569`
                           : `none`
                       }`,
@@ -81,7 +109,7 @@ const Modal6 = ({ openContinueEditModal, onClose }) => {
               <BsDot color="#489DDA" />
             </div>
             <div className="button">
-              <button>Update Staff Member</button>
+              <button onClick={ updateStaffMember}>{loading ? "Loading.." : "Update Staff Member" }</button>
             </div>
           </div>
         </div>

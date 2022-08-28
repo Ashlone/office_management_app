@@ -3,41 +3,42 @@ import { AiOutlineCloseCircle } from "react-icons/ai";
 import { BsDot } from "react-icons/bs";
 import "./Modal2.css";
 import ReactDom from "react-dom";
-import { doc, collection, addDoc } from "firebase/firestore";
 import { ref, getDownloadURL, listAll } from "firebase/storage";
-import { db } from "../../firebase";
 import { useParams } from "react-router-dom";
 import { storage } from "../../firebase";
+import { ADD_STAFF } from '../../mutations/officeMutations';
+import { useMutation } from '@apollo/client';
+import {GET_OFFICES} from'../../queries/officeQueries'
 
-const Modal2 = ({ openModal, onClose, name, lastname }) => {
+const Modal2 = ({ openModal, onClose, name, lastname,setName,setLastName ,setErrorMessage}) => {
   const params = useParams();
   const { id } = params;
 
-  const [loading, setLoading] = useState(false);
-  /**Create staff member and storing it to firebase */
-  const createStaff = async () => {
-    setLoading(true);
-    const docRef = doc(db, "offices", `${id}`);
-    const colRef = collection(docRef, "staff");
+ const [selectedAvatar, setSelectedAvatar] = useState('');
+  /**Create staff member  */
+ const [addStaff,{  loading }] = useMutation(ADD_STAFF, {
+    variables: { id:id, firstName:name,lastName:lastname,avatar:selectedAvatar},
+    refetchQueries: [{ query: GET_OFFICES }]
+  });
 
-    await addDoc(colRef, {
-      lastname,
-      name,
-      selectedAvatar,
-    })
-      .then(() => {
-        console.log("CREATED");
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error creating document", err);
-        setLoading(false);
-      });
-  };
+
+const [error,setError]=useState('')
+
+const createStaff=()=>{
+  if(!selectedAvatar) return setError("Please select an avatar")
+  addStaff({ id:id, firstName:name,lastName:lastname,avatar:selectedAvatar})
+  setLastName('')
+  setName('')
+  setSelectedAvatar('')
+  setError('')
+  setErrorMessage('')
+  onClose()
+}
 
   //Fetching all the avatars from firebase
   const [avatars, setAvatars] = useState([]);
-  const fetchAllAvatars = () => {
+  useEffect(() => {
+    const fetchAllAvatars = () => {
     let list = [];
     const listRef = ref(storage, "avatars");
     listAll(listRef)
@@ -47,6 +48,7 @@ const Modal2 = ({ openModal, onClose, name, lastname }) => {
           getDownloadURL(itemRef).then((downloadURL) => {
             list.push(downloadURL);
             setAvatars(list);
+           
           });
         });
       })
@@ -54,18 +56,17 @@ const Modal2 = ({ openModal, onClose, name, lastname }) => {
         console.log(error);
       });
   };
-
-  useEffect(() => {
     fetchAllAvatars();
-  }, []);
+  }, [setAvatars]);
+
 
   //Selecting the avatar here
-  const [selectedAvatar, setSelectedAvatar] = useState();
   const handleClickAvatar = (avatar) => {
     setSelectedAvatar(() => {
       return avatar;
     });
   };
+
   //This show be at the end
   if (!openModal) {
     return null;
@@ -80,7 +81,7 @@ const Modal2 = ({ openModal, onClose, name, lastname }) => {
               <AiOutlineCloseCircle color="#0D4477" onClick={onClose} />
             </div>
             <div className="avatar-wrapper">
-              <h3>Avatar</h3>
+              <h3>{error ? <span style={{color:"red"}}>{error}</span> : "Avatar"}</h3>
               <div className="avatars">
                 {avatars.map((avatar, index) => (
                   <img
@@ -89,6 +90,7 @@ const Modal2 = ({ openModal, onClose, name, lastname }) => {
                     src={avatar}
                     onClick={() => handleClickAvatar(avatar)}
                     style={{
+                      borderRadius: "50%",
                       border: `${
                         avatar === selectedAvatar ? `4px solid #475569` : `none`
                       }`,
@@ -102,8 +104,8 @@ const Modal2 = ({ openModal, onClose, name, lastname }) => {
               <BsDot color="#489DDA" />
             </div>
             <div className="button-wrapper">
-              <button className="button" onClick={createStaff}>
-                {!loading ? "Add Staff Member" : "Loading.."}
+              <button className="button" onClick={createStaff} >
+                {loading ? "Loading.." : "Add Staff"}
               </button>
             </div>
           </div>

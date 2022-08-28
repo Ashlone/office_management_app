@@ -2,8 +2,13 @@ import React, { useState } from "react";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import "./NewOffice.css";
 import { useNavigate } from "react-router-dom";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "../../firebase";
+
+import { ADD_OFFICE } from '../../mutations/officeMutations';
+import { useMutation } from '@apollo/client';
+import {GET_OFFICES} from'../../queries/officeQueries'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {validEmail } from '../../validations/index'
 
 const NewOffice = () => {
   const navigate = useNavigate();
@@ -14,8 +19,7 @@ const NewOffice = () => {
   const [emailaddress, setEmailAddress] = useState("");
   const [phonenumber, setPhoneNumber] = useState("");
   const [maximumcapacity, setMaximumCapacity] = useState("");
-  const [loading, setLoading] = useState(false);
-
+  const [errorMessage,setErrorMessage]=useState(null)
   //Getting the value of the color and keeping the value
   const colors = [
     "#FFBE0B",
@@ -32,33 +36,58 @@ const NewOffice = () => {
   ];
 
   const [colorpicker, setColorPicker] = useState("");
-  //const colorRef = useRef();
+  
   const handleColorPicker = (color) => {
     setColorPicker(() => {
       return color;
     });
   };
 
-  //Create Office
-  const createOffice = async () => {
-    try {
-      setLoading(true);
-      const docRef = await addDoc(collection(db, "offices"), {
-        officename,
-        physicaladdress,
-        emailaddress,
-        phonenumber,
-        maximumcapacity,
-        colorpicker,
-      });
-      console.log("Document written with ID: ", docRef.id);
-      alert("You have created an office");
-      setLoading(false);
-    } catch (e) {
-      console.error("Error adding document: ", e);
-      setLoading(false);
+//Adding 
+ const [addOffice,{  loading, error }] = useMutation(ADD_OFFICE, {
+    variables: { officeName:officename, email:emailaddress, phone:phonenumber,maximumCapacity:maximumcapacity,physicalAddress:physicaladdress,color:colorpicker },
+     refetchQueries: [{ query: GET_OFFICES }],
+  });
+
+
+  //validating email address
+const handleEmail=(e)=>{
+e.preventDefault();
+  if(!validEmail(e.target.value)){
+    setErrorMessage('Please enter a valid email')
+  }else{
+    setErrorMessage(null)
+  }
+  setEmailAddress(e.target.value)
+}
+
+//validating PhoneNumber
+const [errorNumber,setErrorNumber]=useState(null)
+const handlePhoneNumber=(e)=>{
+  e.preventDefault();
+ if(e.target.value.length > 10){
+    setErrorNumber('Your phonenumber should not have more than 10 digits')
+  }else{
+    setErrorNumber(null)
+  }
+  setPhoneNumber(e.target.value)
+}
+
+
+//Creating Office
+const createOffice = (e) => {
+e.preventDefault();
+//if empty fields are available ,it will return an error
+    if (!officename || !emailaddress|| !phonenumber || !maximumcapacity || !physicaladdress || !colorpicker){
+      return toast('Please fill in all fields');
     }
+    //adding to db here
+    addOffice({ officeName:officename, email:emailaddress, phone:phonenumber,maximumCapacity:maximumcapacity,physicalAddress:physicaladdress,color:colorpicker });
+    if(error) toast(`Failed to add`)
+      navigate('/')
   };
+
+  
 
   return (
     <div>
@@ -70,29 +99,40 @@ const NewOffice = () => {
       </div>
       <div className="form">
         <input
+         type="text"
           placeholder="Office Name"
           value={officename}
           onChange={(e) => setOfficeName(e.target.value)}
         />
         <input
+         type="text"
           placeholder="Physical Address"
           value={physicaladdress}
-          onChange={(e) => setPhysicalAddess(e.target.value)}
+         onChange={(e) => setPhysicalAddess(e.target.value)}
         />
+        {
+          errorMessage && <div className='errorMessage'>{errorMessage}</div>
+        }
         <input
+         type="text"
           placeholder="Email Address"
           value={emailaddress}
-          onChange={(e) => setEmailAddress(e.target.value)}
+          onChange={handleEmail}
         />
+        {
+          errorNumber && <div className='errorMessage'>{errorNumber}</div>
+        }
         <input
           placeholder="Phone Number"
+          type="number"
           value={phonenumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
+          onChange={handlePhoneNumber}
         />
         <input
+          type="number"
           placeholder="Maximum Capacity"
           value={maximumcapacity}
-          onChange={(e) => setMaximumCapacity(e.target.value)}
+           onChange={(e) => setMaximumCapacity(e.target.value)}
         />
       </div>
       <div className="color-title">
@@ -113,9 +153,12 @@ const NewOffice = () => {
           ></div>
         ))}
       </div>
+      <div className='button-container'>
       <button onClick={createOffice} className="button">
-        {!loading ? "Add Office" : "loading..."}
+      {loading ? 'Loading...' : "Add Office"}
       </button>
+      <ToastContainer />
+      </div>
     </div>
   );
 };

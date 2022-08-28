@@ -1,78 +1,40 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import { BiSearch, BiDotsVerticalRounded } from "react-icons/bi";
 import { IoIosAddCircle } from "react-icons/io";
 import "./OfficeView.css";
 import Modal from "../../components/modal/Modal";
 import Modal3 from "../../components/modal/Modal3";
-import { useParams } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { db } from "../../firebase";
+import { useNavigate , useParams} from "react-router-dom";
 import OfficeViewCard from "../../components/cards/OfficeViewCard";
+import { GET_OFFICE} from "../../queries/officeQueries";
+import { useQuery } from "@apollo/client";
+import Spinner from "../../components/loader/Spinner"
 
 const OfficeView = () => {
   //set states
   const [showModal, setShowModal] = useState(false);
   const [openEditDeleteModal, setOpenEditDeleteModal] = useState(false);
-  const [singleDoc, setSingleDoc] = useState();
   const navigate = useNavigate();
   const params = useParams();
   const { id } = params;
-  const [staff, setStaff] = useState([]);
   const [query, setQuery] = useState("");
+  const [staffmemberid,setStaffMemberId]=useState('')
 
-  useEffect(() => {
-    const fetchSingleDoc = async () => {
-      try {
-        //Getting a single document from firebase
-        const docRef = doc(db, "offices", id);
-        const docSnap = await getDoc(docRef);
+const {data,loading ,error}= useQuery(GET_OFFICE, { variables: { id } }); //destructuring data ,loading and error returned from the server
 
-        if (docSnap.exists()) {
-          setSingleDoc(docSnap.data());
-        } else {
-          // doc.data() will be undefined in this case
-          console.log("No such document!");
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchSingleDoc();
-  }, [id]);
-
-  useEffect(() => {
-    //Fetching staff members
-    const fetchSubCollection = async () => {
-      const list = [];
-      try {
-        //Getting  subcollection from document
-        const querySnapshot = await getDocs(
-          collection(db, "offices", `${id}`, "staff")
-        );
-        querySnapshot.forEach((doc) => {
-          list.push({ id: doc.id, ...doc.data() });
-          setStaff(list);
-        });
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchSubCollection();
-  }, [id]);
-
-  //Saving staff member to local storage
-  const getStaffMember = async (member) => {
-    if (localStorage.getItem("staff") !== null) {
-      localStorage.removeItem("staff");
-
-      const stringify = JSON.stringify(member);
-      const data = localStorage.setItem("staff", stringify);
-      console.log(data);
-    }
-    setOpenEditDeleteModal(true);
-  };
+if (loading) return <Spinner/>;
+  if (error)
+    return <p>Something went wrong .Please try to refresh your page</p>;
+ 
+ 
+const handleClick=(staffid)=>{
+  setOpenEditDeleteModal(true)
+  setStaffMemberId(() => {
+      return staffid;
+    });
+  
+}
 
   return (
     <div>
@@ -82,24 +44,26 @@ const OfficeView = () => {
         <span>hidden</span>
         {/**This element will be hidden */}
       </div>
-      <OfficeViewCard singleDoc={singleDoc} />
+      <OfficeViewCard office={data.office} />
       <div className="search-input">
-        <input type="text" onChange={(e) => setQuery(e.target.value)} />
+        <input type="text" onChange={(e) => setQuery(e.target.value)}  />
         <BiSearch />
       </div>
       <div className="staff-members-heading">
         <h3>Staff Members In Office</h3>
-        <span>{staff.length}</span>
+        <span>{data.office.staff.length}</span>
       </div>
-      {staff
-        .filter((user) => user.name.includes(query))
+      {data.office.staff.length >0 ? ( data.office?.staff
+        .filter((user) => user.firstName.includes(query))
         .map((member) => (
           <div key={member.id} className="staff-members-list">
-            <img src={member.selectedAvatar} alt="avatars" />
-            <h6>{member.name + "  " + member.lastname} </h6>
-            <BiDotsVerticalRounded onClick={() => getStaffMember(member)} />
+            <img src={member.avatar} alt="avatars" />
+            <h6>{member.firstName + "  " + member.lastName} </h6>
+            <BiDotsVerticalRounded onClick={()=>handleClick(member.id)} />
           </div>
-        ))}
+        ))):(
+ <p>No Staff Members</p>
+        )}
 
       <div className="floating-button">
         <IoIosAddCircle
@@ -108,10 +72,11 @@ const OfficeView = () => {
           onClick={() => setShowModal(true)}
         />
       </div>
-      <Modal showModal={showModal} onClose={() => setShowModal(false)} />
+      <Modal showModal={showModal} closeAddModal={ () => setShowModal(false)} />
       <Modal3
         openEditDeleteModal={openEditDeleteModal}
         setOpenEditDeleteModal={setOpenEditDeleteModal}
+        staffmemberid={staffmemberid}
       />
     </div>
   );

@@ -1,41 +1,35 @@
-import React, { useState, useEffect } from "react";
+import React, { useState,useEffect} from "react";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import "./EditOffice.css";
 import { useNavigate, useParams } from "react-router-dom";
-import { deleteDoc, doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../../firebase";
+import { GET_OFFICE} from "../../queries/officeQueries";
+import { useQuery } from "@apollo/client";
+import Spinner from "../../components/loader/Spinner"
+import {validEmail } from '../../validations/index'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import {  UPDATE_OFFICE,DELETE_OFFICE } from '../../mutations/officeMutations';
+import { useMutation } from '@apollo/client';
+import {GET_OFFICES} from'../../queries/officeQueries'
 
 const EditOffice = () => {
   const navigate = useNavigate();
   const params = useParams();
-  const { officeid } = params;
+  const { id } = params;
+ 
   //setStates
   const [officename, setOfficeName] = useState("");
   const [physicaladdress, setPhysicalAddess] = useState("");
   const [emailaddress, setEmailAddress] = useState("");
   const [phonenumber, setPhoneNumber] = useState("");
   const [maximumcapacity, setMaximumCapacity] = useState("");
-  const [data, setData] = useState();
+  
 
-  useEffect(() => {
-    const fetchSingleDoc = async () => {
-      try {
-        //Getting a single document from firebase
-        const docRef = doc(db, "offices", `${officeid}`);
-        const docSnap = await getDoc(docRef);
+//Fetching Data
+  const {data , loading }= useQuery(GET_OFFICE, { variables: { id } });
 
-        if (docSnap.exists()) {
-          setData(docSnap.data());
-        } else {
-          // doc.data() will be undefined in this case
-          console.log("No such document!");
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchSingleDoc();
-  }, [officeid]);
+
+
   //Getting the value of the color and keeping the value
   const colors = [
     "#FFBE0B",
@@ -51,44 +45,83 @@ const EditOffice = () => {
     "#8338EC",
   ];
 
+
+
+
+const [colorpicker, setColorPicker] = useState();
+ 
+ useEffect(()=>{
+setColorPicker(data?.office.color)
+setOfficeName(data?.office.officeName)
+setEmailAddress(data?.office.email)
+setMaximumCapacity(data?.office.maximumCapacity)
+setPhoneNumber(data?.office.phone)
+setPhysicalAddess(data?.office.physicalAddress)
+ },[data])
+
+ 
+ 
+
   //Selecting Color
   const handleColorPicker = (color) => {
-    setData((colorpicker) => {
-      return {
-        ...colorpicker,
-        colorpicker: color,
-      };
+    setColorPicker(() => {
+      return color;
     });
+   
   };
 
-  //Update Document
-  const updateOffice = async () => {
-    try {
-      const docRef = doc(db, "offices", `${officeid}`);
-      await updateDoc(docRef, {
-        officename,
-        physicaladdress,
-        emailaddress,
-        phonenumber,
-        maximumcapacity,
-        colorpicker: data.colorpicker,
-      });
+  //validating email address
+const [errorMessage,setErrorMessage]=useState(null)
+const handleEmail=(e)=>{
+e.preventDefault();
+  if(!validEmail(e.target.value)){
+    setErrorMessage('Please enter a valid email')
+  }else{
+    setErrorMessage(null)
+  }
+  setEmailAddress(e.target.value)
+}
 
-      navigate("/");
-    } catch (err) {
-      console.log(err);
+//validating PhoneNumber
+const [errorNumber,setErrorNumber]=useState(null)
+const handlePhoneNumber=(e)=>{
+  e.preventDefault();
+ if(e.target.value.length > 10){
+    setErrorNumber('Your phonenumber should not have more than 10 digits')
+  }else{
+    setErrorNumber(null)
+  }
+  setPhoneNumber(e.target.value)
+}
+
+//Making server request
+ const [updateOffice,{ error }] = useMutation( UPDATE_OFFICE, {
+    variables: { id:id, officeName:officename, email:emailaddress, phone:phonenumber,maximumCapacity:maximumcapacity,physicalAddress:physicaladdress,color:colorpicker },
+     refetchQueries: [{ query: GET_OFFICES }],
+  });
+
+
+//Creating Office
+const handleUpdate = (e) => {
+    e.preventDefault();
+    //if empty fields are available ,it will return an error
+    if (!officename || !emailaddress|| !phonenumber || !maximumcapacity || !physicaladdress || !colorpicker){
+      return toast('Please fill in all fields');
     }
+    updateOffice({ officeName:officename, email:emailaddress, phone:phonenumber,maximumCapacity:maximumcapacity,physicalAddress:physicaladdress,color:colorpicker});
+    toast("Updated Successfully")
+    navigate(`/officeview/${id}`)
   };
 
-  //Delete Office
-  const deleteOffice = async () => {
-    try {
-      await deleteDoc(doc(db, "offices", `${officeid}`));
-      navigate("/");
-    } catch (err) {
-      console.log(err);
-    }
-  };
+//Delete Office
+const [deleteOffice] = useMutation(DELETE_OFFICE, {
+    variables: { id: id },
+    onCompleted: () => navigate('/'),
+    refetchQueries: [{ query: GET_OFFICES }],
+  });
+
+    if (loading) return <Spinner/>;
+  if(error) return <p>Something went wrong..Please refresh your page and try again</p>
 
   return (
     <div>
@@ -100,27 +133,33 @@ const EditOffice = () => {
       </div>
       <div className="form">
         <input
-          placeholder={data?.officename}
+        type="text"
           value={officename}
           onChange={(e) => setOfficeName(e.target.value)}
         />
         <input
-          placeholder={data?.physicaladdress}
+         type="text"
           value={physicaladdress}
           onChange={(e) => setPhysicalAddess(e.target.value)}
         />
+        {
+          errorMessage && <div className='errorMessage'>{errorMessage}</div>
+        }
         <input
-          placeholder={data?.emailaddress}
+        type="text"
           value={emailaddress}
-          onChange={(e) => setEmailAddress(e.target.value)}
+          onChange={ handleEmail}
         />
+        {
+          errorNumber && <div className='errorMessage'>{errorNumber}</div>
+        }
         <input
-          placeholder={data?.phonenumber}
+         type='number'
           value={phonenumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
+          onChange={handlePhoneNumber}
         />
         <input
-          placeholder={data?.maximumcapacity}
+         type="number"
           value={maximumcapacity}
           onChange={(e) => setMaximumCapacity(e.target.value)}
         />
@@ -134,7 +173,7 @@ const EditOffice = () => {
             key={color}
             style={{
               border: `${
-                color === data?.colorpicker ? `4px solid #475569` : `none`
+                 color === colorpicker ? `4px solid #475569` : `none`
               }`,
               background: `${color}`,
               width: "36px",
@@ -145,12 +184,15 @@ const EditOffice = () => {
           ></div>
         ))}
       </div>
-      <button onClick={updateOffice} className="update-button">
+     <div className='buttons'>
+      <button className="update-button" onClick={handleUpdate}>
         Update Office
       </button>
-      <button className="delete-button" onClick={deleteOffice}>
+      <button className="delete-button" onClick={deleteOffice} >
         Delete Office
       </button>
+      </div>
+      <ToastContainer />
     </div>
   );
 };

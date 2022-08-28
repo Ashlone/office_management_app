@@ -1,38 +1,32 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Card from "../../components/cards/Card";
 import "./LandingPage.css";
 import { IoIosAddCircle } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebase";
+import { useQuery } from "@apollo/client";
+import { GET_OFFICES } from "../../queries/officeQueries";
+import Spinner from "../../components/loader/Spinner"
+
+
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [offices, setOffices] = useState([]);
+  const { data, loading, error } = useQuery(GET_OFFICES); //destructiring data ,loading and error returned from the server
 
-  //fetching data from firestore
-  useEffect(() => {
-    const fetchData = async () => {
-      let dataList = [];
-      try {
-        const querySnapshot = await getDocs(collection(db, "offices"));
-        querySnapshot.forEach((doc) => {
-          dataList.push({ id: doc.id, ...doc.data() });
-          setOffices(dataList);
-        });
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchData();
-  }, []);
+  if (loading) return <Spinner/>;
+  if (error)
+    return <p>Something went wrong .Please try to refresh your page.</p>;
 
   return (
     <div className="wrapper">
       <h2 className="title">All Offices</h2>
       <div className="column">
-        {offices.map((office) => (
-          <Card key={office.id} office={office} />
-        ))}
+        {data.offices?.length > 0 ? (
+          data?.offices.map((office) => (
+            <Card key={office.id} office={office} />
+          ))
+        ) : (
+          <p>No Offices</p>
+        )}
       </div>
       <div className="floating-button">
         <IoIosAddCircle

@@ -40,7 +40,7 @@
     align-items: center;
     padding: 16px;
     gap: 10px;
-    width: 232px;
+    width: 80%;
     height: 48px;
     background: #489DDA;
     border-radius: 100px;
@@ -65,7 +65,7 @@
     align-items: center;
     padding: 16px;
     gap: 10px;
-    width: 232px;
+    width: 80%;
     height: 48px;
     background: none;
     border-radius: 100px;
@@ -79,6 +79,16 @@
     letter-spacing: 1px;
     text-transform: uppercase;
     color: #489DDA;
+}
+
+.buttons{
+    text-align:center;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    margin-top:20px;
 }
 
 .color-picker{
