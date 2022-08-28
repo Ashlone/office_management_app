@@ -8,24 +8,23 @@ import EditOffice from "./screens/editoffice/EditOffice";
 import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
 
 const App = () => {
- const cache = new InMemoryCache({
-  typePolicies: {
-    Query: {
-      fields: {
-        offices: {
-          merge(existing, incoming) {
-            return incoming;
+  const cache = new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          offices: {
+            merge(existing, incoming) {
+              return incoming;
+            },
           },
-        },
         },
       },
     },
-  },
-);
+  });
 
   //Connecting to apollo server
   const client = new ApolloClient({
-    uri: "http://localhost:5000/graphql",
+    uri: `${process.env.REACT_APP_API_URL}`,
     cache,
   });
 
